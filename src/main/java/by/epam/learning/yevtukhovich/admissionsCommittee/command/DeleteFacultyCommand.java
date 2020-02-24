@@ -8,6 +8,7 @@ import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.Applicant
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.FacultyService;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.SubjectService;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.ApplicantServiceException;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.FacultyServiceException;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.factory.ServiceFactory;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.factory.ServiceType;
 import by.epam.learning.yevtukhovich.admissionsCommittee.util.Messages;
@@ -31,35 +32,13 @@ public class DeleteFacultyCommand implements Command {
         String facultyName=request.getParameter(Parameters.FACULTY_NAME);
 
         FacultyService facultyService= (FacultyService) ServiceFactory.getService(ServiceType.FACULTY_SERVICE);
-        SubjectService subjectService= (SubjectService) ServiceFactory.getService(ServiceType.SUBJECT_TYPE);
-        ApplicantService applicantService= (ApplicantService) ServiceFactory.getService(ServiceType.APPLICANT_SERVICE);
-        facultyService.takeConnection();
-        subjectService.setConnection(facultyService.getConnection());
-        applicantService.setConnection(subjectService.getConnection());
-
         try {
-            List<Applicant> applicants= applicantService.getApplicantsIdByFacultyId(facultyId);
-            facultyService.setAutoCommit(false);
-
-            if(!applicants.isEmpty()){
-                for (Applicant applicant: applicants) {
-                    subjectService.deleteGrades(applicant.getId());
-                    applicantService.cancelApplication(applicant.getId());
-                }
-            }
-
-            subjectService.deleteRequiredSubjectsByFacultyId(facultyId);
             facultyService.deleteFaculty(facultyId);
-            facultyService.commit();
             LOGGER.info("faculty has been deleted: "+ facultyName);
             page=Pages.REDIRECT_VIEW_FACULTIES;
-        } catch (ApplicantServiceException | SubjectDaoException | FacultyDaoException e) {
-            facultyService.rollback();
+        } catch (FacultyServiceException e) {
             LOGGER.error(e.getMessage());
             request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-        }finally {
-            facultyService.setAutoCommit(true);
-            facultyService.releaseConnection();
         }
         return page;
     }

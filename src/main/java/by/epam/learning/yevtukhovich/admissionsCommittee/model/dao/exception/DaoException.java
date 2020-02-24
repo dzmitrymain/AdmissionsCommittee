@@ -1,22 +1,10 @@
 package by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.exception;
 
-import java.util.concurrent.Executors;
-
 public class DaoException extends Exception {
 
-    public DaoException() {
-    }
+    private static final long serialVersionUID= -4854972581204568010L;
 
     public DaoException(String message) {
         super(message);
     }
-
-    public DaoException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public DaoException(Throwable cause) {
-        super(cause);
-    }
-
 }

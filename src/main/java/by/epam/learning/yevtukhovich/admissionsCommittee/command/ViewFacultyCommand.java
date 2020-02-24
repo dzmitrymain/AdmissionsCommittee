@@ -27,28 +27,20 @@ public class ViewFacultyCommand implements Command {
         String page = Pages.FORWARD_ERROR_PAGE;
 
         int facultyId = Integer.parseInt(request.getParameter(Parameters.ID));
-
         FacultyService facultyService = (FacultyService) ServiceFactory.getService(ServiceType.FACULTY_SERVICE);
-        facultyService.takeConnection();
-
-        SubjectService subjectService = (SubjectService) ServiceFactory.getService(ServiceType.SUBJECT_TYPE);
-        subjectService.setConnection(facultyService.getConnection());
 
         try {
             Faculty faculty = facultyService.getById(facultyId);
             if(faculty!=null) {
-                faculty.setRequiredSubjects(subjectService.retrieveRequiredSubjects(facultyId));
                 LOGGER.info("faculty and required subjects were found and set as attribute");
                 request.setAttribute(Parameters.FACULTY, faculty);
                 page = Pages.FORWARD_VIEW_FACULTY;
             }else{
                 LOGGER.warn("faculty wasn't found");
             }
-        } catch (FacultyServiceException | SubjectServiceException e) {
+        } catch (FacultyServiceException e) {
             LOGGER.error(e.getMessage());
             request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-        } finally {
-            facultyService.releaseConnection();
         }
 
         return page;

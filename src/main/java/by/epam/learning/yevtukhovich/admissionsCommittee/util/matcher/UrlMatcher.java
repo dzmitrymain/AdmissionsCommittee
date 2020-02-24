@@ -17,7 +17,6 @@ public class UrlMatcher {
         while (matcher.find()){
             resultUrl=matcher.group();
         }
-
         return resultUrl;
     }
 }

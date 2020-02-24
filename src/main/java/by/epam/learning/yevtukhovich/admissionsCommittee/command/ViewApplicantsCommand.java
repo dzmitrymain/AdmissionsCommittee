@@ -31,7 +31,6 @@ public class ViewApplicantsCommand implements Command {
         User user = (User) session.getAttribute(Parameters.USER);
 
         ApplicantService applicantService = (ApplicantService) ServiceFactory.getService(ServiceType.APPLICANT_SERVICE);
-        applicantService.takeConnection();
         try {
             Set<Applicant> applicants;
             if (enrollmentId == null && user != null && user.getRole() == UserRole.ADMIN) {
@@ -52,8 +51,6 @@ public class ViewApplicantsCommand implements Command {
             }
         } catch (ApplicantServiceException e) {
             LOGGER.error(e.getMessage());
-        } finally {
-            applicantService.releaseConnection();
         }
         return page;
     }

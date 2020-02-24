@@ -11,7 +11,6 @@ import by.epam.learning.yevtukhovich.admissionsCommittee.util.Pages;
 import by.epam.learning.yevtukhovich.admissionsCommittee.util.Parameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.jvm.hotspot.debugger.Page;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -25,10 +24,9 @@ public class ViewFacultiesCommand implements Command {
         String page=Pages.FORWARD_ERROR_PAGE;
 
         FacultyService facultyService = (FacultyService) ServiceFactory.getService(ServiceType.FACULTY_SERVICE);
-        facultyService.takeConnection();
 
         try {
-            List<Faculty> faculties = facultyService.retrieveAllFaculties();
+            List<Faculty> faculties = facultyService.getAllFaculties();
             if(!faculties.isEmpty()) {
                 LOGGER.info("faculties were found and set as attribute");
                 request.setAttribute(Parameters.FACULTIES, faculties);
@@ -39,8 +37,6 @@ public class ViewFacultiesCommand implements Command {
         } catch (FacultyServiceException e) {
             LOGGER.error(e.getMessage());
             request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-        } finally {
-            facultyService.releaseConnection();
         }
         return page;
     }

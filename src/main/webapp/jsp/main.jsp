@@ -14,15 +14,15 @@
     <div id="content">
 
 
-        <h1><fmt:message key="enrollment"/><c:if test="${not empty enrollment}"> #${enrollment.enrollmentId}</c:if>:
+        <h1><fmt:message key="enrollment"/><c:if test="${not empty enrollment}"> №${enrollment.enrollmentId}</c:if>:
             <c:choose>
             <c:when test="${enrollment.state=='OPENED'}"><font color="#008b8b"><fmt:message key="${enrollment.state}"/></font></h1>
         <p id="infoMessage"><fmt:message key="start_date"/>: <font color="#008b8b"><fmt:formatDate value="${enrollment.startDate}"
-                                                                                                       pattern="dd-MM-yyyy hh:mm"/></font></p>
+                                                                                                       pattern="dd-MM-yyyy HH:mm"/></font></p>
         </c:when>
         <c:otherwise><font color="#b22222"><fmt:message key="CLOSED"/></font></h1>
             <c:if test="${not empty enrollment}"><p id="infoMessage"><fmt:message key="end_date"/>: <font color="#b22222"><fmt:formatDate value="${enrollment.endDate}"
-                                                                                                     pattern="dd-MM-yyyy hh:mm"/></font></p></c:if>
+                                                                                                     pattern="dd-MM-yyyy HH:mm"/></font></p></c:if>
             <p id="infoMessage"><font color="#b22222"><fmt:message key="come_back_later"/></font></p>
         </c:otherwise>
         </c:choose>

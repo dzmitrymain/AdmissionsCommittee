@@ -32,8 +32,6 @@ public class OpenEnrollmentCommand implements Command {
         if (enrollment==null || enrollment.getState() == EnrollmentState.CLOSED) {
 
             EnrollmentService enrollmentService = (EnrollmentService) ServiceFactory.getService(ServiceType.ENROLLMENT_SERVICE);
-            enrollmentService.takeConnection();
-
             try {
                 enrollmentService.openNewEnrollment(new Timestamp(System.currentTimeMillis()));
                 LOGGER.info("new enrollment was opened");
@@ -41,8 +39,6 @@ public class OpenEnrollmentCommand implements Command {
             } catch (EnrollmentServiceException e) {
                 LOGGER.error(e.getMessage());
                 session.setAttribute(Parameters.ERROR,Messages.INTERNAL_ERROR);
-            } finally {
-                enrollmentService.releaseConnection();
             }
         } else {
             LOGGER.debug(Messages.WRONG_ENROLLMENT_STATE);

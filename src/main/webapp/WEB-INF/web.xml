@@ -11,15 +11,6 @@
         <welcome-file>default.htm</welcome-file>
         <welcome-file>default.jsp</welcome-file>
     </welcome-file-list>
-    <servlet>
-        <display-name>DemoServlet</display-name>
-        <servlet-name>DemoServlet</servlet-name>
-        <servlet-class>by.epam.learning.yevtukhovich.admissionsCommittee.demoservlet.DemoServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>DemoServlet</servlet-name>
-        <url-pattern>/demoservlet</url-pattern>
-    </servlet-mapping>
 
     <servlet>
         <servlet-name>Committee</servlet-name>
@@ -117,7 +108,16 @@
     <filter-mapping>
         <filter-name>ResourceFolderFilter</filter-name>
         <url-pattern>/jsp/*</url-pattern>
-<!--        <url-pattern>/style/*</url-pattern>-->
     </filter-mapping>
+
+    <listener>
+        <listener-class>
+            by.epam.learning.yevtukhovich.admissionsCommittee.listener.ContextListener
+        </listener-class>
+    </listener>
+
+    <error-page>
+        <location>/jsp/error.jsp</location>
+    </error-page>
 
 </web-app>

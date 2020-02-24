@@ -18,7 +18,7 @@
             <ul><fmt:message key="Capacity"/>: <font color="#008b8b">${faculty.capacity}</font></ul>
             <ul><fmt:message key="required_subjects"/>: <c:forEach items="${faculty.requiredSubjects}" var="subject" varStatus="loop">
                 <font
-                    color="#008b8b">${subject}</font><c:if test="${!loop.last}">, </c:if></c:forEach></ul>
+                    color="#008b8b">${subject.name}</font><c:if test="${!loop.last}">, </c:if></c:forEach></ul>
         </ol>
         <c:if test="${user.role=='APPLICANT'  && enrollment.state=='OPENED'}">
             <form class="submitButton" action="Committee" method="get">
@@ -39,7 +39,13 @@
                 <input type="hidden" name="command" value="delete_faculty"/>
                 <input type="hidden" name="faculty_name" value="${faculty.name}"/>
                 <input type="hidden" name="id" value="${faculty.id}"/>
-                <input type="submit" value="<fmt:message key="delete_faculty"/>"/>
+                <input type="submit" value="<fmt:message key="delete_faculty"/>" onclick="clicked(event)"/>
+                <script>
+                    function clicked(e) {
+                        if (!confirm('${faculty.name} <fmt:message key="remove_faculty_confirmation"/>.'))
+                            e.preventDefault();
+                    }
+                </script>
             </form>
         </c:if>
 

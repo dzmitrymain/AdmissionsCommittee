@@ -1,5 +1,6 @@
 package by.epam.learning.yevtukhovich.admissionsCommittee.filter;
 
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.connection.ConnectionPool;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Enrollment;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.EnrollmentService;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.EnrollmentServiceException;
@@ -10,7 +11,6 @@ import by.epam.learning.yevtukhovich.admissionsCommittee.util.Pages;
 import by.epam.learning.yevtukhovich.admissionsCommittee.util.Parameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.jvm.hotspot.debugger.Page;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +37,6 @@ public class EnrollmentStateFilter implements Filter {
         HttpSession session = request.getSession();
 
         try {
-            enrollmentService.takeConnection();
             Enrollment latestEnrollment = enrollmentService.getLatestEnrollment();
             if (latestEnrollment != null) {
                 servletRequest.setAttribute(Parameters.ENROLLMENT, latestEnrollment);
@@ -47,11 +46,17 @@ public class EnrollmentStateFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (EnrollmentServiceException e) {
             LOGGER.error(e.getMessage());
-            response.sendRedirect(contextPath + "/" + Pages.REDIRECT_ERROR_PAGE);
+            reInitConnectionPool();
             session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-        } finally {
-            enrollmentService.releaseConnection();
+            request.getRequestDispatcher(Pages.FORWARD_ERROR_PAGE).forward(request, response);
         }
+    }
+
+    private void reInitConnectionPool() {
+        ConnectionPool connectionPool = ConnectionPool.getInstance();
+        connectionPool.closeAll();
+        connectionPool.initPool();
+        LOGGER.info("Connection pool has been reinitialized");
     }
 
     @Override

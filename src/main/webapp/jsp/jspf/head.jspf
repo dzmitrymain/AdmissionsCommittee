@@ -5,12 +5,16 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <html>
-<style>
-    <%@include file='../../style/style.css' %>
-</style>
+<link rel="stylesheet" type="text/css" href="style/style.css">
 
-<c:set var="currentURI" scope="session"
-       value="${pageContext.request.requestURI}"/>
+<c:set var="currentContext" scope="session"
+       value="${pageContext.servletContext.contextPath}"/>
+
+<%--<c:if test="${empty language}">--%>
+<%--    <c:set var="language"--%>
+<%--           value="ru"--%>
+<%--           scope="session"/>--%>
+<%--</c:if>--%>
 
 <c:if test="${not empty param.language}">
     <c:set var="language"
@@ -19,8 +23,13 @@
 </c:if>
 <fmt:setLocale value="${language}"/>
 
-
 <head>
-    <title>Admissions Committee</title>
+    <title><fmt:message key="admissions_committee"/></title>
     <link rel="shortcut icon" href="style/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    <script>$(document).ready(function () {
+        $('#myTable').DataTable();
+    });</script>
 </head>

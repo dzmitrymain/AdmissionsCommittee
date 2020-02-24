@@ -16,24 +16,28 @@
 
         <c:choose>
             <c:when test="${not empty enrollments}">
-                <table>
+                <table id="myTable" class="display">
+                    <thead>
                     <tr>
                         <th><fmt:message key="enrollment"/></th>
                         <th><fmt:message key="start_date"/></th>
                         <th><fmt:message key="end_date"/></th>
                     </tr>
+                    </thead>
+                    <tbody>
                     <c:forEach items="${enrollments}" var="enrollment">
                         <tr>
                             <td>
                                 <a style="color: black" href="Committee?command=view_applicants&id=${enrollment.enrollmentId}">
-                                    <fmt:message key="enrollment"/> #${enrollment.enrollmentId}</a>
+                                    <fmt:message key="enrollment"/> №${enrollment.enrollmentId}</a>
                             </td>
                             <td><font color="#008b8b"><fmt:formatDate value="${enrollment.startDate}"
-                                                                      pattern="dd-MM-yyyy hh:mm"/></font></td>
+                                                                      pattern="dd-MM-yyyy HH:mm"/></font></td>
                             <td><font color="#008b8b"><fmt:formatDate value="${enrollment.endDate}"
-                                                                      pattern="dd-MM-yyyy hh:mm"/></font></td>
+                                                                      pattern="dd-MM-yyyy HH:mm"/></font></td>
                         </tr>
                     </c:forEach>
+                    </tbody>
                 </table>
             </c:when>
             <c:otherwise>

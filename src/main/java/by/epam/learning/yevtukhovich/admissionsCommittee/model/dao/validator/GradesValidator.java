@@ -11,16 +11,16 @@ public class GradesValidator {
 
     private static final Logger LOGGER = LogManager.getLogger(GradesValidator.class.getName());
 
-    public static boolean validateGrades(List<Grade> grades) {
-        for (Grade grade : grades) {
+    public static boolean validateGrades(String[] grades) {
+        for (String grade : grades) {
             try {
-                int gradeInt = Integer.parseInt(grade.getGrade());
+                int gradeInt = Integer.parseInt(grade);
                 if (!(gradeInt >= 5 && gradeInt <= 100)) {
-                    LOGGER.debug(Messages.INVALID_GRADE, gradeInt);
+                    LOGGER.debug(Messages.INVALID_GRADE+" Grade: "+gradeInt);
                     return false;
                 }
             } catch (NumberFormatException e) {
-                LOGGER.debug(Messages.INVALID_GRADE, e.getMessage());
+                LOGGER.debug(e.getMessage()+" Grade: "+grade);
                 return false;
             }
         }

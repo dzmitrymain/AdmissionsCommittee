@@ -6,10 +6,7 @@ import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.exception.Fac
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Faculty;
 import by.epam.learning.yevtukhovich.admissionsCommittee.util.Fields;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +15,12 @@ public class FacultyDaoImpl extends AbstractDao implements FacultyDao {
     private static final String FIND_ALL = "SELECT id, name, capacity FROM admissions_committee.faculty";
     private static final String FIND_BY_ID = "SELECT id, name, capacity FROM admissions_committee.faculty WHERE id=?";
     private static final String INSERT_FACULTY="INSERT INTO admissions_committee.faculty (faculty.name, faculty.capacity) VALUES (?,?)";
-
     private static final String DELETE_BY_ID="DELETE FROM admissions_committee.faculty WHERE id=?";
 
     @Override
-    public List<Faculty> listFaculties() throws FacultyDaoException {
-
-
-        try {
+    public List<Faculty> getAllFaculties() throws FacultyDaoException {
+        Connection connection=pool.getConnection();
+            try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(FIND_ALL);
 
@@ -41,16 +36,17 @@ public class FacultyDaoImpl extends AbstractDao implements FacultyDao {
             return faculties;
         } catch (SQLException e) {
             throw new FacultyDaoException("could not get faculties: " + e.getMessage());
+        }finally {
+            pool.releaseConnection(connection);
         }
 
     }
 
-    public Faculty getById(int id) throws FacultyDaoException {
-
+    public Faculty getById(Connection connection,int facultyId) throws FacultyDaoException {
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID);
-            preparedStatement.setInt(1, id);
+            preparedStatement.setInt(1, facultyId);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             Faculty faculty = null;
@@ -63,13 +59,11 @@ public class FacultyDaoImpl extends AbstractDao implements FacultyDao {
             return faculty;
 
         } catch (SQLException e) {
-            throw new  FacultyDaoException("could not get faculty by id: "+e.getMessage());
+            throw new  FacultyDaoException("could not get faculty by facultyId: "+e.getMessage());
         }
-
     }
 
-    public int insert(Faculty faculty) throws FacultyDaoException {
-
+    public int insert(Connection connection,Faculty faculty) throws FacultyDaoException {
         try{
             PreparedStatement preparedStatement=connection.prepareStatement(INSERT_FACULTY, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1,faculty.getName());
@@ -87,8 +81,7 @@ public class FacultyDaoImpl extends AbstractDao implements FacultyDao {
         }
     }
 
-    public boolean delete(int facultyId) throws FacultyDaoException {
-
+    public boolean delete(Connection connection,int facultyId) throws FacultyDaoException {
         try {
             PreparedStatement preparedStatement=connection.prepareStatement(DELETE_BY_ID);
             preparedStatement.setInt(1,facultyId);

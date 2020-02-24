@@ -10,7 +10,6 @@ import by.epam.learning.yevtukhovich.admissionsCommittee.util.Pages;
 import by.epam.learning.yevtukhovich.admissionsCommittee.util.Parameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.jvm.hotspot.debugger.Page;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -25,8 +24,6 @@ public class DeleteSubjectCommand implements Command {
         String subjectName=request.getParameter(Parameters.SUBJECT_NAME);
 
         SubjectService subjectService = (SubjectService) ServiceFactory.getService(ServiceType.SUBJECT_TYPE);
-        subjectService.takeConnection();
-
         try {
             int subjectId = Integer.parseInt(subjectIdString);
             subjectService.deleteSubject(subjectId);
@@ -35,10 +32,7 @@ public class DeleteSubjectCommand implements Command {
             LOGGER.error(e.getMessage());
             page= Pages.REDIRECT_ERROR_PAGE;
             request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-        }finally {
-            subjectService.releaseConnection();
         }
-
         return page;
     }
 }

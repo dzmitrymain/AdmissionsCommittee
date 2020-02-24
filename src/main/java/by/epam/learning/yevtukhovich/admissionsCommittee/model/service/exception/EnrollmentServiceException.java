@@ -2,18 +2,9 @@ package by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exceptio
 
 public class EnrollmentServiceException extends ServiceException {
 
-    public EnrollmentServiceException() {
-    }
+    private static final long serialVersionUID = 7966809992317883530L;
 
     public EnrollmentServiceException(String message) {
         super(message);
-    }
-
-    public EnrollmentServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public EnrollmentServiceException(Throwable cause) {
-        super(cause);
     }
 }

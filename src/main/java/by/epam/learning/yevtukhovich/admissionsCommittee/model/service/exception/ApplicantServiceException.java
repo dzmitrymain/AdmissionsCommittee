@@ -2,18 +2,10 @@ package by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exceptio
 
 public class ApplicantServiceException extends ServiceException {
 
-    public ApplicantServiceException() {
-    }
+    private static final long serialVersionUID = -6909988332087701031L;
 
     public ApplicantServiceException(String message) {
         super(message);
     }
 
-    public ApplicantServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ApplicantServiceException(Throwable cause) {
-        super(cause);
-    }
 }

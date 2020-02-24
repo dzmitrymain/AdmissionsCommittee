@@ -16,10 +16,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class RegistrationCommand implements Command {
 
@@ -30,7 +28,7 @@ public class RegistrationCommand implements Command {
     public String execute(HttpServletRequest request, ActionType type) {
 
         String page = Pages.REDIRECT_REGISTRATION;
-        if(type==ActionType.POST) {
+        if (type == ActionType.POST) {
             HttpSession session = request.getSession();
 
             String login = request.getParameter(Parameters.LOGIN);
@@ -46,19 +44,17 @@ public class RegistrationCommand implements Command {
 
                 User newUser = new User(UserRole.valueOf(userRole.toUpperCase()), login, password.hashCode(), firstName, lastName, patronymic);
                 UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
-                userService.takeConnection();
 
                 try {
-                    if (userService.checkLoginUniqueness(login)) {
-                        newUser.setUserId(userService.addUser(newUser));
-                        if (newUser.getUserId() != 0) {
+                    Optional<Integer> newUserId = userService.addUser(newUser);
+                    if (newUserId.isPresent()) {
+                        newUser.setUserId(newUserId.get());
                             if (session.getAttribute(Parameters.USER) != null) {
                                 session.invalidate();
                             }
                             session.setAttribute(Parameters.USER, newUser);
                             LOGGER.info("new user has been registered and log in: " + newUser);
                             page = Pages.REDIRECT_PERSONAL_SETTINGS;
-                        }
                     } else {
                         LOGGER.debug(Messages.LOGIN_NOT_UNIQUE);
                         session.setAttribute(Parameters.ERROR, Messages.LOGIN_NOT_UNIQUE);
@@ -67,16 +63,13 @@ public class RegistrationCommand implements Command {
                     LOGGER.error(e.getMessage());
                     request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                     page = Pages.REDIRECT_ERROR_PAGE;
-                } finally {
-                    userService.releaseConnection();
                 }
             } else {
                 LOGGER.debug(errorMessages);
                 session.setAttribute(Parameters.ERRORS, errorMessages);
-
             }
-        }else{
-            page=Pages.FORWARD_REGISTRATION;
+        } else {
+            page = Pages.FORWARD_REGISTRATION;
         }
         return page;
     }

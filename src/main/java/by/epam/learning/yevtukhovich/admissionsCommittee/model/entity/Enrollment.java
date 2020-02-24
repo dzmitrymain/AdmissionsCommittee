@@ -11,15 +11,15 @@ public class Enrollment {
     private Timestamp startDate;
     private Timestamp endDate;
 
+    public Enrollment() {
+
+    }
+
     public Enrollment(int enrollmentId, EnrollmentState state, Timestamp startDate, Timestamp endDate) {
         this.enrollmentId = enrollmentId;
         this.state = state;
         this.startDate = startDate;
         this.endDate = endDate;
-    }
-
-    public Enrollment(){
-
     }
 
     public int getEnrollmentId() {
@@ -52,5 +52,32 @@ public class Enrollment {
 
     public void setEndDate(Timestamp endDate) {
         this.endDate = endDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Enrollment that = (Enrollment) o;
+        return enrollmentId == that.enrollmentId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(enrollmentId);
+    }
+
+    @Override
+    public String toString() {
+        return "Enrollment{" +
+                "enrollmentId=" + enrollmentId +
+                ", state=" + state +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                '}';
     }
 }

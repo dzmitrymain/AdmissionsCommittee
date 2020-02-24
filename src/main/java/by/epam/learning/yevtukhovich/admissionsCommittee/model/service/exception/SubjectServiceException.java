@@ -2,18 +2,11 @@ package by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exceptio
 
 public class SubjectServiceException extends ServiceException {
 
-    public SubjectServiceException() {
-    }
+    private static final long serialVersionUID = 7663391606714118808L;
 
     public SubjectServiceException(String message) {
         super(message);
     }
 
-    public SubjectServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
 
-    public SubjectServiceException(Throwable cause) {
-        super(cause);
-    }
 }

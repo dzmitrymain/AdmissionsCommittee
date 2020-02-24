@@ -16,13 +16,17 @@
 
         <c:choose>
             <c:when test="${not empty applicants}">
-                <table>
+
+                <table id="myTable" class="display">
+                    <thead>
                     <tr>
                         <th><fmt:message key="applicant"/></th>
                         <th><fmt:message key="faculty"/></th>
                         <th><fmt:message key="total_rating"/></th>
                         <th><fmt:message key="status"/></th>
                     </tr>
+                    </thead>
+                    <tbody>
                     <c:forEach items="${applicants}" var="applicant">
                         <tr>
                             <td>
@@ -38,6 +42,7 @@
                             </c:choose>><fmt:message key="${applicant.applicantState}"/><font/></td>
                         </tr>
                     </c:forEach>
+                    </tbody>
                 </table>
             </c:when>
             <c:otherwise>

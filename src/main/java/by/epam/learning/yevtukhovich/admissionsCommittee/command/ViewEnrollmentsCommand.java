@@ -22,7 +22,6 @@ public class ViewEnrollmentsCommand implements Command {
     public String execute(HttpServletRequest request, ActionType actionType) {
 
         EnrollmentService enrollmentService = (EnrollmentService) ServiceFactory.getService(ServiceType.ENROLLMENT_SERVICE);
-        enrollmentService.takeConnection();
 
         try {
             List<Enrollment> enrollments = enrollmentService.getAllClosedEnrollments();
@@ -34,8 +33,6 @@ public class ViewEnrollmentsCommand implements Command {
             }
         } catch (EnrollmentServiceException e) {
             e.printStackTrace();
-        } finally {
-            enrollmentService.releaseConnection();
         }
         return Pages.FORWARD_VIEW_ENROLLMENTS;
     }

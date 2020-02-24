@@ -6,7 +6,7 @@
     <ul>
         <li>
             <h4>
-                <a href="<fmt:message key="uri_prefix"/>Committee?command=view_faculties"
+                <a href="Committee?command=view_faculties"
                    style="color: black"><fmt:message key="show_faculties"/></a>
             </h4>
         </li>

@@ -12,10 +12,17 @@
 
     <div id="content">
 
-        <h3>Something_went_wrong</h3>
-        <c:if test="${not empty error}">
-            <p style="margin: unset;padding: 0% 10px 0% 0%">${error}</p>
-            <c:remove var="error" scope="session"/></c:if>
+        <h1> <fmt:message key="something_went_wrong"/></h1>
+        <c:if test="${empty error}">
+            <c:choose>
+                <c:when test="${requestScope['javax.servlet.error.status_code']==404}">
+                    <c:set var="error" value="not_found_error"/>
+                </c:when>
+                <c:otherwise><c:set var="error" value="internal_error"/></c:otherwise>
+            </c:choose>
+        </c:if>
+        <p style="color: firebrick"><fmt:message key="${error}"/></p>
+        <c:remove var="error" scope="session"/>
     </div>
 
 </div>

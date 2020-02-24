@@ -1,5 +1,6 @@
 package by.epam.learning.yevtukhovich.admissionsCommittee.command;
 
+
 public class CommandManager {
 
     private static String[] commandNames;
@@ -7,28 +8,25 @@ public class CommandManager {
     static {
         CommandType[] commands = CommandType.values();
         commandNames = new String[commands.length];
-        int i = 0;
-        for (CommandType command : commands) {
-            commandNames[i++] = command.name();
+        for (int i = 0; i < commands.length; i++) {
+            commandNames[i] = commands[i].name();
         }
     }
 
     public static Command getCommand(String commandName) {
         CommandType commandType = CommandType.NO_COMMAND;
-        if (commandExists(commandName)) {
+        if (isCommandExist(commandName)) {
             commandType = CommandType.valueOf(commandName.toUpperCase());
         }
         return commandType.getCommand();
     }
 
-    private static boolean commandExists(String commandName) {
-        boolean exists = false;
+    private static boolean isCommandExist(String commandName) {
         for (String name : commandNames) {
             if (name.equalsIgnoreCase(commandName)) {
-                exists = true;
-                break;
+                return true;
             }
         }
-        return exists;
+        return false;
     }
 }

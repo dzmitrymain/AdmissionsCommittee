@@ -18,8 +18,8 @@ public class EnrollmentDaoImpl extends AbstractDao implements EnrollmentDao {
     private static final String INSERT_ENROLLMENT = "INSERT INTO enrollment(enrollment_state_id, start_date) VALUES ('1', ?)";
     private static final String SELECT_CLOSED_ENROLLMENTS = "SELECT id,start_date,end_date FROM admissions_committee.enrollment WHERE end_date is not null";
 
-
     public List<Enrollment> getAllClosedEnrollments() throws EnrollmentDaoException {
+        Connection connection = pool.getConnection();
         try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(SELECT_CLOSED_ENROLLMENTS);
@@ -37,34 +37,49 @@ public class EnrollmentDaoImpl extends AbstractDao implements EnrollmentDao {
             return enrollments;
         } catch (SQLException e) {
             throw new EnrollmentDaoException("could not get al closed enrollments: " + e.getMessage());
+        } finally {
+            pool.releaseConnection(connection);
         }
     }
 
-    public boolean openNewEnrollment(Timestamp timestamp) throws EnrollmentDaoException {
+    public void openNewEnrollment(Timestamp timestamp) throws EnrollmentDaoException {
+        Connection connection = pool.getConnection();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_ENROLLMENT);
             preparedStatement.setTimestamp(1, timestamp);
             preparedStatement.execute();
 
-            return true;
         } catch (SQLException e) {
             throw new EnrollmentDaoException("could not open new enrollment: " + e.getMessage());
+        } finally {
+            pool.releaseConnection(connection);
         }
     }
 
-    public boolean closeCurrentEnrollment(Timestamp timestamp) throws EnrollmentDaoException {
+    public void closeCurrentEnrollment(Connection connection, Timestamp timestamp) throws EnrollmentDaoException {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_LAST_ENROLLMENT);
             preparedStatement.setTimestamp(1, timestamp);
             preparedStatement.execute();
-            return true;
         } catch (SQLException e) {
             throw new EnrollmentDaoException("could not close current enrollment: " + e.getMessage());
         }
     }
 
     public Enrollment getLatestEnrollment() throws EnrollmentDaoException {
+        Connection connection = pool.getConnection();
+        try {
+            return findLatestEnrollment(connection);
+        } finally {
+            pool.releaseConnection(connection);
+        }
+    }
 
+    public Enrollment getLatestEnrollment(Connection connection) throws EnrollmentDaoException {
+        return findLatestEnrollment(connection);
+    }
+
+    private Enrollment findLatestEnrollment(Connection connection) throws EnrollmentDaoException {
         try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(FIND_LATEST_ENROLLMENT);
@@ -81,5 +96,4 @@ public class EnrollmentDaoImpl extends AbstractDao implements EnrollmentDao {
             throw new EnrollmentDaoException("could not get latest enrollment: " + e.getMessage());
         }
     }
-
 }

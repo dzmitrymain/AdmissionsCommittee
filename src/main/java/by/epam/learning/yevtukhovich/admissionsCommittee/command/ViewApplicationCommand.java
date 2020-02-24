@@ -28,22 +28,16 @@ public class ViewApplicationCommand implements Command {
     public String execute(HttpServletRequest request, ActionType actionType) {
 
         String page = Pages.FORWARD_ERROR_PAGE;
-
-
         int applicantId = Integer.parseInt(request.getParameter(Parameters.ID));
 
         ApplicantService applicantService = (ApplicantService) ServiceFactory.getService(ServiceType.APPLICANT_SERVICE);
-        SubjectService subjectService = (SubjectService) ServiceFactory.getService(ServiceType.SUBJECT_TYPE);
-        applicantService.takeConnection();
-        subjectService.setConnection(applicantService.getConnection());
 
         try {
             Applicant applicant = applicantService.getApplicantById(applicantId);
             if (applicant != null) {
-                List<Subject> subjects = subjectService.getSubjectGrades(applicantId);
                 request.setAttribute(Parameters.APPLICANT, applicant);
-                request.setAttribute(Parameters.SUBJECTS, subjects);
-                LOGGER.info("application has been found and set as attributes: 'applicant' 'subjects'");
+                request.setAttribute(Parameters.SUBJECTS, applicant.getSubjects());
+                LOGGER.info("application has been found and set as attribute");
 
             } else {
                 LOGGER.warn("application has not been found");
@@ -52,8 +46,6 @@ public class ViewApplicationCommand implements Command {
         } catch (ApplicantServiceException | SubjectServiceException e) {
             LOGGER.error(e.getMessage());
             request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-        } finally {
-            applicantService.releaseConnection();
         }
         return page;
     }

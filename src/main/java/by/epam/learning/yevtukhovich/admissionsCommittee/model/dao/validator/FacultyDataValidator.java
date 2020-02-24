@@ -20,7 +20,7 @@ public static boolean validateCapacity(String capacityString){
 
     try {
         int capacity=Integer.parseInt(capacityString);
-        return capacity >= 3 && capacity <= 100;
+        return capacity >= 2 && capacity <= 100;
     }catch (NumberFormatException e){
         return false;
     }

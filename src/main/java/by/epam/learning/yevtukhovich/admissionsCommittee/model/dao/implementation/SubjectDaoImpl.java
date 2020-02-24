@@ -7,11 +7,7 @@ import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Grade;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Subject;
 import by.epam.learning.yevtukhovich.admissionsCommittee.util.Fields;
 
-import javax.print.DocFlavor;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +23,8 @@ public class SubjectDaoImpl extends AbstractDao implements SubjectDao {
     private static final String DELETE_SUBJECT_BY_ID = "DELETE FROM admissions_committee.subject WHERE subject.id=?";
     private static final String DELETE_REQUIRED_SUBJECTS_BY_FACULTY_ID = "DELETE FROM admissions_committee.required_subject WHERE faculty_id=?";
 
-    public List<Subject> getRequiredSubjects(int facultyId) throws SubjectDaoException {
 
+    public List<Subject> getRequiredSubjects(Connection connection, int facultyId) throws SubjectDaoException {
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(FIND_SUBJECTS_BY_FACULTY_ID);
@@ -48,10 +44,9 @@ public class SubjectDaoImpl extends AbstractDao implements SubjectDao {
         } catch (SQLException e) {
             throw new SubjectDaoException("could not get required subjects: " + e.getMessage());
         }
-
     }
 
-    public List<Subject> getSubjectGradesByApplicantId(int applicantId) throws SubjectDaoException {
+    public List<Subject> getSubjectGradesByApplicantId(Connection connection, int applicantId) throws SubjectDaoException {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(FIND_SUBJECT_GRADE_BY_APPLICANT_ID);
             preparedStatement.setInt(1, applicantId);
@@ -68,23 +63,21 @@ public class SubjectDaoImpl extends AbstractDao implements SubjectDao {
         } catch (SQLException e) {
             throw new SubjectDaoException("could not get subjects grades by applicant id:" + e.getMessage());
         }
-
     }
 
-    public boolean deleteGradesByApplicantId(int applicantId) throws SubjectDaoException {
+    public void deleteGradesByApplicantId(Connection connection, int applicantId) throws SubjectDaoException {
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_GRADES_BY_APPLICANT_ID);
             preparedStatement.setInt(1, applicantId);
             preparedStatement.execute();
-            return true;
         } catch (SQLException e) {
             throw new SubjectDaoException("could not delete grades by id: " + e.getMessage());
         }
     }
 
     public List<Subject> getAllSubjects() throws SubjectDaoException {
-
+        Connection connection = pool.getConnection();
         try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(FIND_ALL_SUBJECTS);
@@ -99,13 +92,13 @@ public class SubjectDaoImpl extends AbstractDao implements SubjectDao {
             return subjects;
         } catch (SQLException e) {
             throw new SubjectDaoException("could not get all subjects: " + e.getMessage());
+        } finally {
+            pool.releaseConnection(connection);
         }
-
-
     }
 
-    public boolean insertGrades(List<Grade> grades) throws SubjectDaoException {
 
+    public void insertGrades(Connection connection, List<Grade> grades) throws SubjectDaoException {
         for (Grade grade : grades) {
             try {
                 PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SUBJECT_GRADES);
@@ -119,27 +112,23 @@ public class SubjectDaoImpl extends AbstractDao implements SubjectDao {
                 throw new SubjectDaoException("could not insert grades " + e.getMessage());
             }
         }
-        return true;
     }
 
-    public boolean insertRequiredSubjects(int facultyId, int[] subjectId) throws SubjectDaoException {
-
-        for (int subjId : subjectId) {
-
+    public void insertRequiredSubjects(Connection connection, int facultyId, List<Subject> subjects) throws SubjectDaoException {
+        for (Subject subject : subjects) {
             try {
                 PreparedStatement preparedStatement = connection.prepareStatement(INSERT_REQUIRED_SUBJECTS);
                 preparedStatement.setInt(1, facultyId);
-                preparedStatement.setInt(2, subjId);
+                preparedStatement.setInt(2, subject.getSubjectId());
                 preparedStatement.execute();
             } catch (SQLException e) {
                 throw new SubjectDaoException("could not insert required subjects: " + e.getMessage());
             }
         }
-        return true;
     }
 
     public boolean insert(Subject subject) throws SubjectDaoException {
-
+        Connection connection = pool.getConnection();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SUBJECT);
             preparedStatement.setString(1, subject.getName());
@@ -147,11 +136,13 @@ public class SubjectDaoImpl extends AbstractDao implements SubjectDao {
             return true;
         } catch (SQLException e) {
             throw new SubjectDaoException("could not insert subject: " + e.getMessage());
+        } finally {
+            pool.releaseConnection(connection);
         }
     }
 
     public boolean delete(int subjectId) throws SubjectDaoException {
-
+        Connection connection = pool.getConnection();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SUBJECT_BY_ID);
             preparedStatement.setInt(1, subjectId);
@@ -159,21 +150,18 @@ public class SubjectDaoImpl extends AbstractDao implements SubjectDao {
             return true;
         } catch (SQLException e) {
             throw new SubjectDaoException("could not delete subject by id: " + e.getMessage());
+        } finally {
+            pool.releaseConnection(connection);
         }
     }
 
-    public boolean deleteRequiredSubjects(int facultyId) throws SubjectDaoException {
-
+    public void deleteRequiredSubjectsByFacultyId(Connection connection, int facultyId) throws SubjectDaoException {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_REQUIRED_SUBJECTS_BY_FACULTY_ID);
             preparedStatement.setInt(1, facultyId);
             preparedStatement.execute();
-            return true;
         } catch (SQLException e) {
             throw new SubjectDaoException("could not delete required subjects by faculty id: " + e.getMessage());
         }
     }
-
-
-
 }

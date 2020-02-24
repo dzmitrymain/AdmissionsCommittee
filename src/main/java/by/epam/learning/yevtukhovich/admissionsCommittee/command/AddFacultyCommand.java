@@ -1,13 +1,13 @@
 package by.epam.learning.yevtukhovich.admissionsCommittee.command;
 
 import by.epam.learning.yevtukhovich.admissionsCommittee.controller.ActionType;
-import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.exception.SubjectDaoException;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.validator.FacultyDataValidator;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Faculty;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Subject;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.FacultyService;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.SubjectService;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.FacultyServiceException;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.SubjectServiceException;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.factory.ServiceFactory;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.factory.ServiceType;
 import by.epam.learning.yevtukhovich.admissionsCommittee.util.Messages;
@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AddFacultyCommand implements Command {
@@ -28,58 +28,47 @@ public class AddFacultyCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, ActionType actionType) {
 
-        String page;
+        String page = actionType == ActionType.POST ? Pages.REDIRECT_ERROR_PAGE : Pages.FORWARD_ERROR_PAGE;
         HttpSession session = request.getSession();
-        SubjectService subjectService = (SubjectService) ServiceFactory.getService(ServiceType.SUBJECT_TYPE);
-        subjectService.takeConnection();
 
-        if (actionType == ActionType.GET) {
-            try {
+        try {
+            if (actionType == ActionType.GET) {
+                SubjectService subjectService = (SubjectService) ServiceFactory.getService(ServiceType.SUBJECT_TYPE);
                 List<Subject> subjects = subjectService.getAllSubjects();
-                subjectService.releaseConnection();
                 request.setAttribute(Parameters.SUBJECTS, subjects);
-                LOGGER.info("subjects were found and set as attribute");
+                LOGGER.info("subjects has been gotten and set as attribute");
                 page = Pages.FORWARD_ADD_FACULTY;
-            } catch (SubjectDaoException e) {
-                page = Pages.FORWARD_ERROR_PAGE;
-                session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-                LOGGER.error(e.getMessage());
-            }
-        } else {
-            String facultyName = request.getParameter(Parameters.FACULTY_NAME);
-            String[] subjectStringId = request.getParameterValues(Parameters.SUBJECT_ID);
-            String capacityString = request.getParameter(Parameters.CAPACITY);
-            if (FacultyDataValidator.validateFacultyName(facultyName) && subjectStringId != null && FacultyDataValidator.validateCapacity(capacityString)) {
-                int[] subjectId = new int[subjectStringId.length];
-                FacultyService facultyService = (FacultyService) ServiceFactory.getService(ServiceType.FACULTY_SERVICE);
-                facultyService.setConnection(subjectService.getConnection());
-                try {
-                    for (int i = 0; i < subjectStringId.length; i++) {
-                        subjectId[i] = Integer.parseInt(subjectStringId[i]);
+            } else {
+                String facultyName = request.getParameter(Parameters.FACULTY_NAME);
+                String[] subjectsIdStrings = request.getParameterValues(Parameters.SUBJECT_ID);
+                String capacityString = request.getParameter(Parameters.CAPACITY);
+                if (FacultyDataValidator.validateFacultyName(facultyName) && subjectsIdStrings != null && FacultyDataValidator.validateCapacity(capacityString)) {
+                    List<Subject> requiredSubjects = new ArrayList<>();
+                    Subject subject;
+                    for (String idString : subjectsIdStrings) {
+                        subject = new Subject();
+                        subject.setSubjectId(Integer.parseInt(idString));
+                        requiredSubjects.add(subject);
                     }
                     Faculty faculty = new Faculty();
                     faculty.setName(facultyName);
                     faculty.setCapacity(Integer.parseInt(capacityString));
-                    facultyService.setAutoCommit(false);
-                    int newFacultyId = facultyService.addFaculty(faculty);
-                    subjectService.addRequiredSubjects(newFacultyId, subjectId);
-                    facultyService.commit();
+                    faculty.setRequiredSubjects(requiredSubjects);
+
+                    FacultyService facultyService = (FacultyService) ServiceFactory.getService(ServiceType.FACULTY_SERVICE);
+                    facultyService.addFaculty(faculty);
+
                     LOGGER.info("faculty has been added: " + faculty);
                     page = Pages.REDIRECT_VIEW_FACULTIES;
-                } catch (FacultyServiceException | SubjectDaoException | NumberFormatException e) {
-                    facultyService.rollback();
-                    LOGGER.error(e.getMessage());
-                    session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-                    page = Pages.REDIRECT_ERROR_PAGE;
-                } finally {
-                    facultyService.setAutoCommit(true);
-                    facultyService.releaseConnection();
+                } else {
+                    page = Pages.REDIRECT_ADD_FACULTY;
+                    session.setAttribute(Parameters.ERROR, Messages.INVALID_FACULTY_DATA);
+                    LOGGER.warn(Messages.INVALID_FACULTY_DATA);
                 }
-            } else {
-                page = Pages.REDIRECT_ADD_FACULTY;
-                session.setAttribute(Parameters.ERROR, Messages.INVALID_FACULTY_DATA);
-                LOGGER.warn(Messages.INVALID_FACULTY_DATA);
             }
+        } catch (FacultyServiceException | SubjectServiceException | NumberFormatException e) {
+            LOGGER.error(e.getMessage());
+            session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
         }
         return page;
     }

@@ -19,21 +19,40 @@
                 <c:when test="${user.role=='ADMIN'}">
 
                     <h3 style="margin-left: 20%"><fmt:message key="control_panel"/>:</h3>
-
+                    <script>
+                        let confirmationMessage;
+                    </script>
                     <c:choose>
                         <c:when test="${enrollment.state=='OPENED'}">
+                            <script>
+                                confirmationMessage='<fmt:message key="enrollment"/> №${enrollment.enrollmentId} <fmt:message key="close_enrollment_confirmation"/>.';
+                            </script>
                             <form class="controlPanel" action="Committee" method="post">
                                 <input name="command" value="close_enrollment" type="hidden"/>
-                                <input type="submit" value="<fmt:message key="close_enrollment"/>"/>
+                                <input type="submit" value="<fmt:message key="close_enrollment"/>" onclick="clicked(event)"/>
                             </form>
                         </c:when>
                         <c:otherwise>
+                            <script>
+                                const currentEnrollmentId=parseInt(${enrollment.enrollmentId});
+                                let newEnrollmentId=1;
+                                if(!isNaN(currentEnrollmentId)){
+                                    newEnrollmentId+=currentEnrollmentId;
+                                }
+                                confirmationMessage='<fmt:message key="enrollment"/> №'+newEnrollmentId+' <fmt:message key="open_enrollment_confirmation"/>.';
+                            </script>
                             <form class="controlPanel" action="Committee" method="post">
                                 <input name="command" value="open_enrollment" type="hidden"/>
-                                <input type="submit" value="<fmt:message key="open_enrollment"/>"/>
+                                <input type="submit" value="<fmt:message key="open_enrollment"/>" onclick="clicked(event)"/>
                             </form>
                         </c:otherwise>
                     </c:choose>
+                    <script>
+                        function clicked(e) {
+                            if (!confirm(confirmationMessage))
+                                e.preventDefault();
+                        }
+                    </script>
                 </c:when>
                 <c:otherwise>
 

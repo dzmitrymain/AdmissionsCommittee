@@ -34,7 +34,6 @@ public class PersonalSettingsCommand implements Command {
             page = Pages.FORWARD_PERSONAL_SETTINGS;
             if (user.getRole() == UserRole.APPLICANT) {
                 ApplicantService applicantService= (ApplicantService) ServiceFactory.getService(ServiceType.APPLICANT_SERVICE);
-                applicantService.takeConnection();
                 try {
                    List<Applicant> applicants = applicantService.getApplicantsByUserId(user.getUserId());
                    if(!applicants.isEmpty()) {
@@ -45,12 +44,10 @@ public class PersonalSettingsCommand implements Command {
                 } catch (ApplicantServiceException e) {
                     LOGGER.error(e.getMessage());
                     session.setAttribute(Parameters.ERROR,Messages.INTERNAL_ERROR);
-                } finally {
-                    applicantService.releaseConnection();
                 }
             }
         } else {
-            session.setAttribute(Parameters.ERROR, Messages.WRONG_USER_ROLE);
+            session.setAttribute(Parameters.ERROR, Messages.NO_ACCESS);
         }
         return page;
     }

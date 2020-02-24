@@ -23,7 +23,8 @@
             <input name="command" type="hidden" value="apply"/>
 
             <c:forEach items="${faculty.requiredSubjects}" var="subject">
-                <input class="register_field" name="${subject}" placeholder="${subject}"/><br>
+                <input class="register_field" name="grade" placeholder="${subject.name}"/><br>
+<%--                <input type="hidden" name="subject_name" value="${subject.name}"/>--%>
             </c:forEach>
             <input type="hidden" name="id" value="${faculty.id}"/>
             <input class="submitButton" type="submit" value="<fmt:message key="apply"/>"/><br>

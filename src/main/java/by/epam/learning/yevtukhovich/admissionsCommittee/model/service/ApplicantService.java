@@ -1,59 +1,109 @@
 package by.epam.learning.yevtukhovich.admissionsCommittee.model.service;
 
-import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.exception.ApplicantDaoException;
-import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Applicant;
-import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Faculty;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.exception.*;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.factory.DaoFactory;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.factory.DaoType;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.implementation.ApplicantDaoImpl;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.implementation.EnrollmentDaoImpl;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.implementation.FacultyDaoImpl;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.implementation.SubjectDaoImpl;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.*;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.state.ApplicantState;
-
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.state.EnrollmentState;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.ApplicantServiceException;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.SubjectServiceException;
 
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
 
 public class ApplicantService extends Service {
 
-    private ApplicantDaoImpl applicantDao;
-
-    {
-        applicantDao = (ApplicantDaoImpl) DaoFactory.getDao(DaoType.APPLICANT_DAO);
-        dao = applicantDao;
-    }
-
-    public int addApplicant(Applicant newApplicant) throws ApplicantServiceException {
+    public boolean addApplicant(Applicant newApplicant, String[] grades) throws ApplicantServiceException {
+        Connection connection = pool.getConnection();
         try {
-            return applicantDao.insert(newApplicant);
-        } catch (ApplicantDaoException e) {
-            logger.error(e.getMessage());
-            throw new ApplicantServiceException(e.getMessage());
+            connection.setAutoCommit(false);
+            try {
+                if (!isAlreadyApplied(connection, newApplicant)) {
+                    List<Subject> requiredSubjects=subjectDao.getRequiredSubjects(connection,newApplicant.getFacultyId());
+                    newApplicant.setId(applicantDao.insert(connection, newApplicant));
+                    List<Grade> newApplicantGrades = convertStringsToGrades(grades, requiredSubjects, newApplicant);
+                    subjectDao.insertGrades(connection, newApplicantGrades);
+                    connection.commit();
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (ApplicantDaoException | SubjectDaoException e) {
+                connection.rollback();
+                throw new DaoException(e.getMessage());
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (DaoException | SQLException ex) {
+            logger.error(ex.getMessage());
+            throw new ApplicantServiceException(ex.getMessage());
+        } finally {
+            pool.releaseConnection(connection);
         }
     }
 
-    public boolean isAlreadyApplied(Applicant newApplicant) throws ApplicantServiceException {
+    private List<Grade> convertStringsToGrades(String[] gradesStrings, List<Subject> requiredSubjects, Applicant newApplicant) {
+
+        List<Grade> applicantGrades = new ArrayList<>();
+        Grade grade;
+        for (int i = 0; i < gradesStrings.length; i++) {
+            grade = new Grade();
+            grade.setGrade(gradesStrings[i]);
+            grade.setApplicantId(newApplicant.getId());
+            grade.setSubjectId(requiredSubjects.get(i).getSubjectId());
+            applicantGrades.add(grade);
+        }
+        return applicantGrades;
+    }
+
+    private boolean isAlreadyApplied(Connection connection, Applicant newApplicant) throws ApplicantServiceException {
         try {
-            int userId = newApplicant.getUserId();
-            List<Applicant> applicants = applicantDao.getApplicantsByUserId(userId);
+            List<Applicant> applicants = applicantDao.getApplicantsByUserId(connection, newApplicant.getUserId());
             for (Applicant applicant : applicants) {
                 if (applicant.getApplicantState() == ApplicantState.APPLIED) {
-                    return false;
+                    return true;
                 }
             }
         } catch (ApplicantDaoException e) {
             logger.error(e.getMessage());
             throw new ApplicantServiceException(e.getMessage());
         }
-        return true;
+        return false;
     }
 
-    public boolean cancelApplication(int applicantId) throws ApplicantServiceException {
+    public boolean cancelApplication(int applicantId, User currentUser) throws ApplicantServiceException {
+        Connection connection = pool.getConnection();
         try {
-            return applicantDao.deleteApplicantById(applicantId);
-        } catch (ApplicantDaoException e) {
-            logger.error(e.getMessage());
-            throw new ApplicantServiceException(e.getMessage());
+            connection.setAutoCommit(false);
+            try {
+                Enrollment currentEnrollment = enrollmentDao.getLatestEnrollment(connection);
+                Applicant applicant = applicantDao.getApplicantById(connection, applicantId);
+                if (currentEnrollment.getState() == EnrollmentState.OPENED && applicant.getEnrollmentId() == currentEnrollment.getEnrollmentId()
+                        && applicant.getUserId() == currentUser.getUserId()) {
+                    subjectDao.deleteGradesByApplicantId(connection, applicantId);
+                    applicantDao.deleteApplicantById(connection, applicantId);
+                    connection.commit();
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (ApplicantDaoException | EnrollmentDaoException | SubjectDaoException e) {
+                connection.rollback();
+                throw new DaoException(e.getMessage());
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (DaoException | SQLException ex) {
+            logger.error(ex.getMessage());
+            throw new ApplicantServiceException(ex.getMessage());
+        } finally {
+            pool.releaseConnection(connection);
         }
     }
 
@@ -66,41 +116,30 @@ public class ApplicantService extends Service {
         }
     }
 
-    public Applicant getApplicantById(int applicantId) throws ApplicantServiceException {
-        try{
-            return applicantDao.getApplicantById(applicantId);
-        } catch (ApplicantDaoException e) {
-            logger.error(e.getMessage());
-            throw new ApplicantServiceException(e.getMessage());
-        }
-    }
-
-    public Map<Faculty, TreeSet<Applicant>> getLatestEnrollmentApplicants() throws ApplicantServiceException {
+    public Applicant getApplicantById(int applicantId) throws ApplicantServiceException, SubjectServiceException {
+        Connection connection = pool.getConnection();
+        Applicant applicant;
         try {
-            return applicantDao.getCurrentEnrollmentApplicants();
+            applicant = applicantDao.getApplicantById(connection, applicantId);
+            if (applicant != null) {
+                applicant.setSubjects(subjectDao.getSubjectGradesByApplicantId(connection, applicantId));
+            }
+            return applicant;
         } catch (ApplicantDaoException e) {
             logger.error(e.getMessage());
             throw new ApplicantServiceException(e.getMessage());
-        }
-    }
-
-    public boolean enrollApplicants(List<Integer> idList) throws ApplicantServiceException {
-
-        try {
-            applicantDao.updateEnrolledApplicantsState(idList);
-            applicantDao.updateNotEnrolledApplicantsState();
-            return true;
-        } catch (ApplicantDaoException e) {
+        } catch (SubjectDaoException e) {
             logger.error(e.getMessage());
-            throw new ApplicantServiceException(e.getMessage());
+            throw new SubjectServiceException(e.getMessage());
+        } finally {
+            pool.releaseConnection(connection);
         }
-
-
     }
+
 
     public TreeSet<Applicant> getCurrentApplicants() throws ApplicantServiceException {
         try {
-            return applicantDao.getApplicantsByEnrollment(0);
+            return applicantDao.getApplicantsByEnrollment(Optional.empty());
         } catch (ApplicantDaoException e) {
             logger.error(e.getMessage());
             throw new ApplicantServiceException(e.getMessage());
@@ -109,22 +148,10 @@ public class ApplicantService extends Service {
 
     public TreeSet<Applicant> getApplicantsByEnrollment(int enrollmentId) throws ApplicantServiceException {
         try {
-            return applicantDao.getApplicantsByEnrollment(enrollmentId);
+            return applicantDao.getApplicantsByEnrollment(Optional.of(enrollmentId));
         } catch (ApplicantDaoException e) {
             logger.error(e.getMessage());
             throw new ApplicantServiceException(e.getMessage());
         }
     }
-
-    public List<Applicant> getApplicantsIdByFacultyId(int facultyId) throws ApplicantServiceException {
-
-        try{
-            return applicantDao.getApplicantsIdByFacultyId(facultyId);
-        } catch (ApplicantDaoException e) {
-            logger.error(e.getMessage());
-            throw new ApplicantServiceException(e.getMessage());
-        }
-    }
-
-
 }

@@ -2,18 +2,9 @@ package by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.exception;
 
 public class EnrollmentDaoException extends DaoException {
 
-    public EnrollmentDaoException() {
-    }
+    private static final long serialVersionUID= 930374717751043958L;
 
     public EnrollmentDaoException(String message) {
         super(message);
-    }
-
-    public EnrollmentDaoException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public EnrollmentDaoException(Throwable cause) {
-        super(cause);
     }
 }

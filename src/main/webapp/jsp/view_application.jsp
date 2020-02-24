@@ -17,7 +17,7 @@
             <p class="personalData"><fmt:message key="applicant_name"/>: <font
                     color="#008b8b">${applicant.lastName} ${applicant.firstName} ${applicant.patronymic}</font></p>
             <p class="personalData"><fmt:message key="enrollment"/>: <font
-                    color="#008b8b">#${applicant.enrollmentId}</font>
+                    color="#008b8b">№${applicant.enrollmentId}</font>
             </p>
             <p class="personalData"><fmt:message key="faculty"/>: <font color="#008b8b">${applicant.facultyName}</font>
             </p>
@@ -33,7 +33,13 @@
                 <form action="Committee" method="post">
                     <input type="hidden" name="command" value="cancel_application"/>
                     <input type="hidden" name="applicant_id" value="${applicant.id}"/>
-                    <input class="submitButton" type="submit" value="<fmt:message key="cancel"/>"/>
+                    <input class="submitButton" type="submit" value="<fmt:message key="cancel"/>" onclick="clicked(event)"/>
+                    <script>
+                        function clicked(e) {
+                            if (!confirm('<fmt:message key="cancel_application_confirmation"/>.'))
+                                e.preventDefault();
+                        }
+                    </script>
                 </form>
             </c:if>
         </div>

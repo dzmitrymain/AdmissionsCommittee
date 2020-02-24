@@ -29,11 +29,10 @@ public class LoginCommand implements Command {
         String login = request.getParameter(Parameters.LOGIN);
         String password = request.getParameter(Parameters.PASSWORD);
 
-        LOGGER.debug("login " + login + " password: " + password);
+        LOGGER.debug("login: " + login + " password hashCode: " + password.hashCode());
 
         if (!password.equals("") && !login.equals("")) {
             UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
-            userService.takeConnection();
             User user;
             try {
                 user = userService.login(login);
@@ -56,8 +55,6 @@ public class LoginCommand implements Command {
             } catch (UserServiceException e) {
                 LOGGER.error(e.getMessage());
                 session.setAttribute(Parameters.LOGIN_ERROR,Messages.INTERNAL_ERROR);
-            }finally {
-                userService.releaseConnection();
             }
         } else {
             LOGGER.info("field not filled");

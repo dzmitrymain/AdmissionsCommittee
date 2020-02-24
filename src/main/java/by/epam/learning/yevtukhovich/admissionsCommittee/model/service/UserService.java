@@ -1,23 +1,18 @@
 package by.epam.learning.yevtukhovich.admissionsCommittee.model.service;
 
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.exception.UserDaoException;
-import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.User;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.factory.DaoFactory;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.factory.DaoType;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.implementation.UserDaoImpl;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.User;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.UserServiceException;
+
+import java.sql.Connection;
+import java.util.Optional;
 
 public class UserService extends Service {
 
-    private UserDaoImpl userDao;
-
-    {
-        userDao = (UserDaoImpl) DaoFactory.getDao(DaoType.USER_DAO);
-        dao = userDao;
-    }
-
     public User login(String login) throws UserServiceException {
-
         try {
             return userDao.getByLogin(login);
         } catch (UserDaoException e) {
@@ -28,13 +23,19 @@ public class UserService extends Service {
 
     }
 
-    public int addUser(User user) throws UserServiceException {
-
+    public Optional<Integer> addUser(User user) throws UserServiceException {
+        Connection connection = pool.getConnection();
         try {
-            return userDao.insert(user);
+            if (checkLoginUniqueness(connection, user.getLogin())) {
+                return Optional.of(userDao.insert(connection, user));
+            } else {
+                return Optional.empty();
+            }
         } catch (UserDaoException e) {
             logger.error(e.getMessage());
             throw new UserServiceException(e.getMessage());
+        } finally {
+            pool.releaseConnection(connection);
         }
     }
 
@@ -47,18 +48,15 @@ public class UserService extends Service {
         }
     }
 
-    public boolean checkLoginUniqueness(String login) throws UserServiceException {
+    private boolean checkLoginUniqueness(Connection connection, String login) throws UserServiceException {
 
         try {
-            User user = userDao.getByLogin(login);
-            return user == null ? true : false;
+            User user = userDao.getByLogin(connection, login);
+            return user == null;
 
         } catch (UserDaoException e) {
             logger.error(e.getMessage());
             throw new UserServiceException(e.getMessage());
         }
-
     }
-
-
 }

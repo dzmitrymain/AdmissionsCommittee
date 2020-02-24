@@ -2,6 +2,8 @@ package by.epam.learning.yevtukhovich.admissionsCommittee.model.entity;
 
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.role.UserRole;
 
+import java.util.Objects;
+
 public class User {
 
     private int userId;
@@ -12,14 +14,8 @@ public class User {
     private String lastName;
     private String patronymic;
 
-    public User(int userId, UserRole role, String login, int password, String firstName, String lastName, String patronymic) {
-        this.userId = userId;
-        this.role = role;
-        this.login = login;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.patronymic = patronymic;
+    public User() {
+
     }
 
     public User(UserRole role, String login, int password, String firstName, String lastName, String patronymic) {
@@ -29,10 +25,6 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.patronymic = patronymic;
-    }
-
-    public User(){
-
     }
 
     public int getUserId() {
@@ -92,12 +84,33 @@ public class User {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        if (userId != user.userId) {
+            return false;
+        }
+        return Objects.equals(login, user.login);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = userId;
+        result = 31 * result + (login != null ? login.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "User{" +
                 "userId=" + userId +
                 ", role=" + role +
                 ", login='" + login + '\'' +
-                ", password=" + password +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", patronymic='" + patronymic + '\'' +

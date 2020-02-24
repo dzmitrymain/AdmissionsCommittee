@@ -1,5 +1,5 @@
 .submitButton {
-    margin: 20px auto 30px auto;
+    margin-top: 20px;
     text-align: center;
 }
 
@@ -21,7 +21,7 @@
 }
 
 #banner {
-    background: transparent url(style/banner.png) no-repeat;
+    background: transparent url(banner.png) no-repeat;
     background-size: 100%;
     width: 870px;
     height: 180px;
@@ -71,6 +71,8 @@ a:hover img {
 #site_content {
     width: 880px;
     margin: 15px auto 0 auto;
+    /*height: 60%;*/
+    min-height: calc(100vh - 245px);
 }
 
 #content h1 {
@@ -95,6 +97,7 @@ a:hover img {
     font-family: 'trebuchet ms', sans-serif;
     font-size: 80%;
     height: 100px;
+    max-height: 100px;
     text-align: center;
     background: #696969;
     color: #FFF;
@@ -118,7 +121,7 @@ a:hover img {
 
 
 #header {
-    height: 140px;
+    /*height: 140px;*/
     background: #000000;
 
 }
@@ -126,7 +129,8 @@ a:hover img {
 #logo {
     width: 880px;
     position: relative;
-    height: 140px;
+
+    height: 145px;
     background: #1d1d1d;
 }
 
@@ -160,21 +164,22 @@ a:hover img {
 
 }
 
-#content table {
-    margin: auto auto 30px auto;
-    /*border-color: darkcyan;*/
-    border-collapse: collapse;
-    border: 1px solid black;
-}
+/*#content table {*/
+/*    margin: auto auto 30px auto;*/
+/*    !*border-color: darkcyan;*!*/
+/*    border-collapse: collapse;*/
+/*    border: 1px solid black;*/
+/*}*/
 
-#content table td, th {
-    padding: 1px 5px 1px 5px;
-    border: 1px solid black;
-}
+/*#content table td, th {*/
+/*    padding: 1px 5px 1px 5px;*/
+/*    border: 1px solid black;*/
+/*}*/
 
 #content {
     width: 75%;
     float: right;
+    margin-bottom: 50px;
     /*margin-right: 20%;*/
 }
 

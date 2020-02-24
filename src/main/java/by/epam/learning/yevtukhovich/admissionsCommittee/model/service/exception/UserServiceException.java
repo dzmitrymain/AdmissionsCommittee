@@ -2,18 +2,9 @@ package by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exceptio
 
 public class UserServiceException extends ServiceException {
 
-    public UserServiceException() {
-    }
+    private static final long serialVersionUID = 8932325362027588634L;
 
     public UserServiceException(String message) {
         super(message);
-    }
-
-    public UserServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public UserServiceException(Throwable cause) {
-        super(cause);
     }
 }
