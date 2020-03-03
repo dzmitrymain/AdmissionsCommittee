@@ -12,13 +12,13 @@
 
     <div id="content">
 
-        <h1><fmt:message key="faculty"/>: <font color="#008b8b">${faculty.name}</font></h1>
+        <h1><fmt:message key="faculty"/>: <font color="#008b8b"><c:out value="${faculty.name}"/></font></h1>
 
         <ol>
-            <ul><fmt:message key="Capacity"/>: <font color="#008b8b">${faculty.capacity}</font></ul>
+            <ul><fmt:message key="Capacity"/>: <font color="#008b8b"><c:out value="${faculty.capacity}"/></font></ul>
             <ul><fmt:message key="required_subjects"/>: <c:forEach items="${faculty.requiredSubjects}" var="subject" varStatus="loop">
                 <font
-                    color="#008b8b">${subject.name}</font><c:if test="${!loop.last}">, </c:if></c:forEach></ul>
+                    color="#008b8b"><c:out value="${subject.name}"/></font><c:if test="${!loop.last}">, </c:if></c:forEach></ul>
         </ol>
         <c:if test="${user.role=='APPLICANT'  && enrollment.state=='OPENED'}">
             <form class="submitButton" action="Committee" method="get">
@@ -48,10 +48,6 @@
                 </script>
             </form>
         </c:if>
-
-
-
-
     </div>
 
 </div>

@@ -7,7 +7,6 @@ public class Messages {
     public static final String INTERNAL_ERROR = "internal_error";
     public static final String WRONG_USER_ROLE = "wrong_user_role";
     public static final String WRONG_ENROLLMENT_STATE = "wrong_enrollment_state";
-    public static final String COMMAND_WITHOUT_PARAMETERS = "command_without_parameters";
     public static final String INVALID_GRADE = "invalid_grade";
     public static final String INVALID_LOGIN = "invalid_login";
     public static final String LOGIN_NOT_UNIQUE = "login_not_unique";

@@ -12,16 +12,18 @@
 
     <div id="content">
 
-        <h1> <fmt:message key="something_went_wrong"/></h1>
+        <h1><fmt:message key="something_went_wrong"/></h1>
         <c:if test="${empty error}">
-            <c:choose>
-                <c:when test="${requestScope['javax.servlet.error.status_code']==404}">
-                    <c:set var="error" value="not_found_error"/>
-                </c:when>
-                <c:otherwise><c:set var="error" value="internal_error"/></c:otherwise>
-            </c:choose>
+            <c:if test="${requestScope['javax.servlet.error.status_code']==404}">
+                <c:set var="error" value="not_found_error"/>
+            </c:if>
+            <c:if test="${requestScope['javax.servlet.error.status_code']==503}">
+                <c:set var="error" value="internal_error"/>
+            </c:if>
         </c:if>
-        <p style="color: firebrick"><fmt:message key="${error}"/></p>
+        <c:if test="${not empty error}">
+            <p style="color: firebrick"><fmt:message key="${error}"/></p>
+        </c:if>
         <c:remove var="error" scope="session"/>
     </div>
 

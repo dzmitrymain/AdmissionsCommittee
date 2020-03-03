@@ -10,12 +10,6 @@
 <c:set var="currentContext" scope="session"
        value="${pageContext.servletContext.contextPath}"/>
 
-<%--<c:if test="${empty language}">--%>
-<%--    <c:set var="language"--%>
-<%--           value="ru"--%>
-<%--           scope="session"/>--%>
-<%--</c:if>--%>
-
 <c:if test="${not empty param.language}">
     <c:set var="language"
            value="${param.language}"

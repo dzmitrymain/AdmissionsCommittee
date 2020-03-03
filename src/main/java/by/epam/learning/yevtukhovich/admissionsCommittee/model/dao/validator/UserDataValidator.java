@@ -23,12 +23,12 @@ public class UserDataValidator {
     private static final int USER_ROLE_ERROR_INDEX = 6;
 
     private static final String NAME_PATTERN = "[A-Z][a-z]{1,20}";
-    // private static final String LOGIN_PATTERN = "[A-Za-z0-9]{4,20}";
     private static final String PASSWORD_PATTERN = "(?=[a-zA-Z0-9]*[A-Z])[a-zA-Z0-9]{4,20}";
     private static final String LOGIN_PATTERN = ".+";
-    //private static final String PASSWORD_PATTERN = ".+";
 
     private static final String[] ERROR_MESSAGES;
+
+    private static final String[] userRoleNames;
 
     static {
         ERROR_MESSAGES = new String[VALIDATION_PARAMETERS_NUMBER];
@@ -39,6 +39,61 @@ public class UserDataValidator {
         ERROR_MESSAGES[NAME_ERROR_INDEX] = Messages.INVALID_NAME;
         ERROR_MESSAGES[PATRONYMIC_ERROR_INDEX] = Messages.INVALID_NAME;
         ERROR_MESSAGES[USER_ROLE_ERROR_INDEX] = Messages.INVALID_USER_ROLE;
+    }
+
+    static {
+        UserRole[] userRoles = UserRole.values();
+        userRoleNames = new String[userRoles.length];
+
+        for (int i = 0; i < userRoleNames.length; i++) {
+            userRoleNames[i] = userRoles[i].name();
+        }
+    }
+
+    public static List<String> validateRegistrationForm(String login, String password, String repeatPassword, String surname, String name, String patronymic, String userRole) {
+
+        boolean[] checks = new boolean[VALIDATION_PARAMETERS_NUMBER];
+        checks[LOGIN_ERROR_INDEX] = UserDataValidator.validateLogin(login);
+        checks[PASSWORD_ERROR_INDEX] = UserDataValidator.validatePassword(password);
+        checks[PASSWORDS_DIFFER_ERROR_INDEX] = UserDataValidator.validateRepeatPassword(password, repeatPassword);
+        checks[SURNAME_ERROR_INDEX] = UserDataValidator.validateNameComponent(surname);
+        checks[NAME_ERROR_INDEX] = UserDataValidator.validateNameComponent(name);
+        checks[PATRONYMIC_ERROR_INDEX] = UserDataValidator.validateNameComponent(patronymic);
+        checks[USER_ROLE_ERROR_INDEX] = UserDataValidator.validateUserRole(userRole);
+
+
+        return createErrorList(checks);
+    }
+
+    private static List<String> createErrorList(boolean[] checks) {
+
+        List<String> errors = new ArrayList<>(VALIDATION_PARAMETERS_NUMBER);
+
+        int errorNumber = 0;
+        for (int i = 0; i < VALIDATION_PARAMETERS_NUMBER; i++) {
+            if (!checks[i]) {
+                LOGGER.info(ERROR_MESSAGES[i]);
+                errors.add(ERROR_MESSAGES[i]);
+                errorNumber++;
+            } else {
+                errors.add(null);
+            }
+        }
+
+        return errorNumber == 0 ? null : errors;
+    }
+
+    public static List<String> validateEditingForm(String lastName, String firstName, String patronymic) {
+
+        boolean[] checks = new boolean[VALIDATION_PARAMETERS_NUMBER];
+        checks[LOGIN_ERROR_INDEX] = true;
+        checks[PASSWORD_ERROR_INDEX] = true;
+        checks[PASSWORDS_DIFFER_ERROR_INDEX] = true;
+        checks[SURNAME_ERROR_INDEX] = UserDataValidator.validateNameComponent(lastName);
+        checks[NAME_ERROR_INDEX] = UserDataValidator.validateNameComponent(firstName);
+        checks[PATRONYMIC_ERROR_INDEX] = UserDataValidator.validateNameComponent(patronymic);
+        checks[USER_ROLE_ERROR_INDEX] = true;
+        return createErrorList(checks);
     }
 
 
@@ -75,59 +130,17 @@ public class UserDataValidator {
         }
     }
 
-    private static boolean validateUserRole(String string) {
+    private static boolean validateUserRole(String userRoleString) {
 
-        if (string != null) {
-            UserRole userRole = UserRole.valueOf(string.toUpperCase());
-            return userRole != null ? true : false;
-        } else {
-            return false;
-        }
-    }
-
-    public static List<String> validateRegistrationForm(String login, String password, String repeatPassword, String surname, String name, String patronymic, String userRole) {
-
-        boolean[] checks = new boolean[VALIDATION_PARAMETERS_NUMBER];
-        checks[LOGIN_ERROR_INDEX] = UserDataValidator.validateLogin(login);
-        checks[PASSWORD_ERROR_INDEX] = UserDataValidator.validatePassword(password);
-        checks[PASSWORDS_DIFFER_ERROR_INDEX] = UserDataValidator.validateRepeatPassword(password, repeatPassword);
-        checks[SURNAME_ERROR_INDEX] = UserDataValidator.validateNameComponent(surname);
-        checks[NAME_ERROR_INDEX] = UserDataValidator.validateNameComponent(name);
-        checks[PATRONYMIC_ERROR_INDEX] = UserDataValidator.validateNameComponent(patronymic);
-        checks[USER_ROLE_ERROR_INDEX] = UserDataValidator.validateUserRole(userRole);
-
-
-        return createErrorList(checks);
-    }
-
-    public static List<String> validateEditingForm(String lastName, String firstName, String patronymic) {
-
-        boolean[] checks = new boolean[VALIDATION_PARAMETERS_NUMBER];
-        checks[LOGIN_ERROR_INDEX] = true;
-        checks[PASSWORD_ERROR_INDEX] = true;
-        checks[PASSWORDS_DIFFER_ERROR_INDEX] = true;
-        checks[SURNAME_ERROR_INDEX] = UserDataValidator.validateNameComponent(lastName);
-        checks[NAME_ERROR_INDEX] = UserDataValidator.validateNameComponent(firstName);
-        checks[PATRONYMIC_ERROR_INDEX] = UserDataValidator.validateNameComponent(patronymic);
-        checks[USER_ROLE_ERROR_INDEX] = true;
-        return createErrorList(checks);
-    }
-
-    private static List<String> createErrorList(boolean[] checks) {
-
-        List<String> errors = new ArrayList<>();
-
-        int errorNumber = 0;
-        for (int i = 0; i < VALIDATION_PARAMETERS_NUMBER; i++) {
-            if (!checks[i]) {
-                LOGGER.info(ERROR_MESSAGES[i]);
-                errors.add(ERROR_MESSAGES[i]);
-                errorNumber++;
-            } else {
-                errors.add(null);
+        if (userRoleString != null) {
+            for (String userRoleName : userRoleNames) {
+                if (userRoleName.equalsIgnoreCase(userRoleString)) {
+                    return true;
+                }
             }
         }
-
-        return errorNumber == 0 ? null : errors;
+        return false;
     }
+
+
 }

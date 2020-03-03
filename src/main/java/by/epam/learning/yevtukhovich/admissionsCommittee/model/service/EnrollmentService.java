@@ -7,6 +7,7 @@ import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Applicant;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Enrollment;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.Faculty;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.EnrollmentServiceException;
+import com.google.common.annotations.VisibleForTesting;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -70,7 +71,8 @@ public class EnrollmentService extends Service {
         }
     }
 
-    private List<Integer> calculateEnrolledApplicantsId(Map<Faculty, TreeSet<Applicant>> applicants) {
+    @VisibleForTesting
+    List<Integer> calculateEnrolledApplicantsId(Map<Faculty, TreeSet<Applicant>> applicants) {
         List<Integer> enrolledIdList = new ArrayList<>();
         Set<Faculty> faculties = applicants.keySet();
         int count;

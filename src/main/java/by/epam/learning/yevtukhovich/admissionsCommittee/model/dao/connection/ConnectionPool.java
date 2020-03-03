@@ -1,43 +1,22 @@
 package by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.connection;
 
 import by.epam.learning.yevtukhovich.admissionsCommittee.util.configuration.ConfigurationData;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 public class ConnectionPool {
 
+    private static final Logger LOGGER = LogManager.getLogger(ConnectionPool.class.getName());
     private static final int CONNECTIONS_INIT_NUMBER = 10;
-    private static final int QUEUE_WAITING_DELAY = 1;
     private static ConnectionPool instance;
 
     private BlockingQueue<Connection> connections;
-
-    public void initPool() {
-        try {
-            Class.forName(ConfigurationData.getString(ConfigurationData.DRIVER_PATH));
-
-            connections = new ArrayBlockingQueue<>(CONNECTIONS_INIT_NUMBER);
-
-            for (int i = 0; i < CONNECTIONS_INIT_NUMBER; i++) {
-
-                try {
-                    connections.add(DriverManager.getConnection(ConfigurationData.getString(ConfigurationData.DATABASE_CONNECTION_PATH), ConfigurationData.getString(ConfigurationData.DATABASE_LOGIN), ConfigurationData.getString(ConfigurationData.DATABASE_PASSWORD)));
-                } catch (SQLException e) {
-                    //logger
-                    //e.printStackTrace();
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            //logger
-            e.printStackTrace();
-        }
-    }
-
 
     public static ConnectionPool getInstance() {
         if (instance == null) {
@@ -46,46 +25,58 @@ public class ConnectionPool {
         return instance;
     }
 
+    public void initPool() {
+        try {
+            Class.forName(ConfigurationData.getString(ConfigurationData.DRIVER_PATH));
+            connections = new ArrayBlockingQueue<>(CONNECTIONS_INIT_NUMBER);
+            int successConnectionNumber = 0;
+
+            for (int i = 0; i < CONNECTIONS_INIT_NUMBER; i++) {
+                try {
+                    connections.add(DriverManager.getConnection(ConfigurationData.getString(ConfigurationData.DATABASE_CONNECTION_PATH), ConfigurationData.getString(ConfigurationData.DATABASE_LOGIN), ConfigurationData.getString(ConfigurationData.DATABASE_PASSWORD)));
+                    successConnectionNumber++;
+                } catch (SQLException e) {
+                    LOGGER.error(e.getMessage());
+                }
+            }
+            if (successConnectionNumber == 0) {
+                connections = null;
+                LOGGER.warn("Connection pool has been initialized with no one success connection");
+            }else {
+                LOGGER.info("Connection pool has been initialized with connections number: "+successConnectionNumber);
+            }
+        } catch (ClassNotFoundException e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
+
     public Connection getConnection() {
         Connection connection = null;
-//        try {
-//            connection = connections.poll(QUEUE_WAITING_DELAY, TimeUnit.SECONDS);
-//        } catch (InterruptedException e) {
-//            //logger
-//            //  e.printStackTrace();
-//        }
-
-        while (connection == null) {
-            try {
-                connection = connections.poll(QUEUE_WAITING_DELAY, TimeUnit.MILLISECONDS);
-                if (connection == null) {
-                    connections.add(DriverManager.getConnection(ConfigurationData.getString(ConfigurationData.DATABASE_CONNECTION_PATH), ConfigurationData.getString(ConfigurationData.DATABASE_LOGIN), ConfigurationData.getString(ConfigurationData.DATABASE_PASSWORD)));
-                }
-            } catch (SQLException | InterruptedException e) {
-                //logger
-                e.printStackTrace();
-            }
+        try {
+            connection = connections.take();
+        } catch (NullPointerException e) {
+            LOGGER.debug("there are no success connections in queue");
+        } catch (InterruptedException e) {
+            LOGGER.error(e.getMessage());
         }
         return connection;
     }
 
     public void releaseConnection(Connection connection) {
-
         if (connection != null) {
-
             connections.add(connection);
         }
     }
 
     public void closeAll() {
-        for (Connection connection : connections) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                //logger
-                e.printStackTrace();
+        if (connections != null) {
+            for (Connection connection : connections) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    LOGGER.error("could not close connection: "+e.getMessage());
+                }
             }
         }
     }
-
 }

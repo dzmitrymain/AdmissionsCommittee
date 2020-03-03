@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class UrlMatcher {
 
-    public static final String regex="[^\\/]+$";
+    private static final String regex="[^\\/]+$";
 
     public static String matchUrl(String string){
 

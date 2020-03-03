@@ -45,8 +45,6 @@
                                             </ins>
                                         </div>
                                         <div style="padding: 5px 0px 5px 0px">
-
-
                                             <input placeholder="<fmt:message key="login"/>"
                                                    style="width: 47%;  margin: 1px" name="login"/>
                                             <input
@@ -73,7 +71,5 @@
                     id="eng"><img class="locale" alt="eng" src="style/eng.png"/></a></div>
             <script src="js/changeLocale.js"></script>
         </div>
-
     </div>
-
 </div>

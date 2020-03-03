@@ -1,6 +1,7 @@
 package by.epam.learning.yevtukhovich.admissionsCommittee.command;
 
 import by.epam.learning.yevtukhovich.admissionsCommittee.controller.ActionType;
+import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.connection.ConnectionPool;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.validator.UserDataValidator;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.User;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.role.UserRole;
@@ -16,8 +17,9 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.sql.Connection;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 public class RegistrationCommand implements Command {
 
@@ -40,37 +42,56 @@ public class RegistrationCommand implements Command {
             String userRole = request.getParameter(Parameters.USER_ROLE);
 
             List<String> errorMessages = UserDataValidator.validateRegistrationForm(login, password, repeatPassword, lastName, firstName, patronymic, userRole);
-            if (errorMessages == null) {
 
-                User newUser = new User(UserRole.valueOf(userRole.toUpperCase()), login, password.hashCode(), firstName, lastName, patronymic);
-                UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
+            UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
+            Connection connection = ConnectionPool.getInstance().getConnection();
 
-                try {
-                    Optional<Integer> newUserId = userService.addUser(newUser);
-                    if (newUserId.isPresent()) {
-                        newUser.setUserId(newUserId.get());
-                            if (session.getAttribute(Parameters.USER) != null) {
-                                session.invalidate();
-                            }
-                            session.setAttribute(Parameters.USER, newUser);
-                            LOGGER.info("new user has been registered and log in: " + newUser);
-                            page = Pages.REDIRECT_PERSONAL_SETTINGS;
-                    } else {
+            try {
+                boolean uniquenessCheck = userService.checkLoginUniqueness(connection, login);
+                if (errorMessages == null && uniquenessCheck) {
+
+                    User newUser = new User(UserRole.valueOf(userRole.toUpperCase()), login, password.hashCode(), firstName, lastName, patronymic);
+                    newUser.setUserId(userService.addUser(connection, newUser));
+
+                    if (session.getAttribute(Parameters.USER) != null) {
+                        session.invalidate();
+                    }
+                    session.setAttribute(Parameters.USER, newUser);
+                    LOGGER.info("new user has been registered and log in as: " + newUser);
+                    page = Pages.REDIRECT_PERSONAL_SETTINGS;
+                } else {
+                    String[] inputValues = {login, null, null, lastName, firstName, patronymic, userRole};
+                    List<String> validValues = selectValidValues(inputValues, errorMessages);
+                    LOGGER.debug(errorMessages);
+                    session.setAttribute(Parameters.VALID_VALUES, validValues);
+                    session.setAttribute(Parameters.ERRORS, errorMessages);
+                    if (errorMessages.get(0) == null && !uniquenessCheck) {
                         LOGGER.debug(Messages.LOGIN_NOT_UNIQUE);
                         session.setAttribute(Parameters.ERROR, Messages.LOGIN_NOT_UNIQUE);
                     }
-                } catch (UserServiceException e) {
-                    LOGGER.error(e.getMessage());
-                    request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
-                    page = Pages.REDIRECT_ERROR_PAGE;
                 }
-            } else {
-                LOGGER.debug(errorMessages);
-                session.setAttribute(Parameters.ERRORS, errorMessages);
+            } catch (UserServiceException e) {
+                LOGGER.error(e.getMessage());
+                request.getSession().setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
+                page = Pages.REDIRECT_ERROR_PAGE;
+            } finally {
+                ConnectionPool.getInstance().releaseConnection(connection);
             }
         } else {
             page = Pages.FORWARD_REGISTRATION;
         }
         return page;
+    }
+
+    private List<String> selectValidValues(String[] inputValues, List<String> errorMessages) {
+
+        for (int i = 0; i < inputValues.length; i++) {
+            if (inputValues[i] != null) {
+                if (errorMessages.get(i) != null) {
+                    inputValues[i] = null;
+                }
+            }
+        }
+        return Arrays.asList(inputValues);
     }
 }

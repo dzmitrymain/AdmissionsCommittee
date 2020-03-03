@@ -29,4 +29,6 @@ public class Parameters {
     public static final String FACULTY_NAME = "faculty_name";
     public static final String CAPACITY = "capacity";
     public static final String GRADE = "grade";
+    public static final String VALID_VALUES = "validValues";
+
 }

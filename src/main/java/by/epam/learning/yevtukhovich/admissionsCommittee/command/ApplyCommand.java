@@ -78,7 +78,7 @@ public class ApplyCommand implements Command {
                     session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);
                 }
             } else {
-                LOGGER.debug(Messages.COMMAND_WITHOUT_PARAMETERS);
+                LOGGER.warn("wrong input parameters");
                 session.setAttribute(Parameters.ERROR, Messages.NO_ACCESS);
             }
         } else {

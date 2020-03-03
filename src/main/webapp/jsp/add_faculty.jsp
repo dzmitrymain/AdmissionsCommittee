@@ -25,19 +25,17 @@
             <div style="margin: 0px auto 20px 30%"><input type="text" name="faculty_name" placeholder="<fmt:message
             key="faculty_name"/>"/>
                 <input type="number" name="capacity" placeholder="<fmt:message key="capacity"/>"/> ${error}
-
             </div>
             <c:remove var="error" scope="session"/>
             <c:forEach items="${subjects}" var="subject">
                 <input style="margin-left: 45%" type="checkbox" name="subject_id"
-                       value="${subject.subjectId}"/>${subject.name}
+                       value="${subject.subjectId}"/><c:out value="${subject.name}"/>
                 <br/>
             </c:forEach>
             <input style="margin: 15px auto 30px 45%" type="submit" value="<fmt:message key="add"/>"/>
         </form>
     </div>
 </div>
-
 
 <%@ include file="jspf/footer.jspf" %>
 

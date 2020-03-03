@@ -40,14 +40,7 @@ public class EditProfileCommand implements Command {
                     user.setLastName(lastName);
                     user.setFirstName(firstName);
                     user.setPatronymic(patronymic);
-//                    User updatedUser = new User();
-//                    updatedUser.setUserId(user.getUserId());
-//                    updatedUser.setFirstName(firstName);
-//                    updatedUser.setLastName(lastName);
-//                    updatedUser.setPatronymic(patronymic);
-//                    updatedUser.setRole(user.getRole());
-//                    updatedUser.setPassword(user.getPassword());
-//                    updatedUser.setLogin(user.getLogin());
+
                     UserService userService = (UserService) ServiceFactory.getService(ServiceType.USER_SERVICE);
                     try {
                         userService.editUser(user);

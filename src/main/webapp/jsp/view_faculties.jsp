@@ -16,7 +16,7 @@
 
         <ol >
             <c:forEach var="faculty" items="${faculties}">
-                <li><a style="color: darkcyan" href="Committee?command=view_faculty&id=${faculty.id}">${faculty.name}</a></li>
+                <li><a style="color: darkcyan" href="Committee?command=view_faculty&id=${faculty.id}"><c:out value="${faculty.name}"/></a></li>
             </c:forEach>
         </ol>
         <c:if test="${user.role=='ADMIN'}">

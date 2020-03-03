@@ -15,15 +15,15 @@
         <h1><fmt:message key="application_information"/>:</h1>
         <div style="margin-left: 30%">
             <p class="personalData"><fmt:message key="applicant_name"/>: <font
-                    color="#008b8b">${applicant.lastName} ${applicant.firstName} ${applicant.patronymic}</font></p>
+                    color="#008b8b"><c:out value="${applicant.lastName}"/> <c:out value="${applicant.firstName}"/> <c:out value="${applicant.patronymic}"/></font></p>
             <p class="personalData"><fmt:message key="enrollment"/>: <font
-                    color="#008b8b">№${applicant.enrollmentId}</font>
+                    color="#008b8b">№<c:out value="${applicant.enrollmentId}"/></font>
             </p>
-            <p class="personalData"><fmt:message key="faculty"/>: <font color="#008b8b">${applicant.facultyName}</font>
+            <p class="personalData"><fmt:message key="faculty"/>: <font color="#008b8b"><c:out value="${applicant.facultyName}"/></font>
             </p>
             <p class="personalData"><fmt:message key="subjects"/>:
-                <c:forEach items="${subjects}" var="subject" varStatus="loop">${subject.name} <font
-                        color="#008b8b">${subject.grade}</font><c:if test="${!loop.last}">, </c:if></c:forEach>
+                <c:forEach items="${subjects}" var="subject" varStatus="loop"><c:out value="${subject.name}"/> <font
+                        color="#008b8b"><c:out value="${subject.grade}"/></font><c:if test="${!loop.last}">, </c:if></c:forEach>
             </p>
             <p class="personalData"><fmt:message key="application_state"/>: <font color="<c:choose>
                                 <c:when test="${applicant.applicantState=='NOT_ENROLLED'}">firebrick</c:when>

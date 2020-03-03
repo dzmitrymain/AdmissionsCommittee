@@ -25,7 +25,7 @@
                     <c:choose>
                         <c:when test="${enrollment.state=='OPENED'}">
                             <script>
-                                confirmationMessage='<fmt:message key="enrollment"/> №${enrollment.enrollmentId} <fmt:message key="close_enrollment_confirmation"/>.';
+                                confirmationMessage='<fmt:message key="enrollment"/> №<c:out value="${enrollment.enrollmentId}"/> <fmt:message key="close_enrollment_confirmation"/>.';
                             </script>
                             <form class="controlPanel" action="Committee" method="post">
                                 <input name="command" value="close_enrollment" type="hidden"/>
@@ -34,7 +34,7 @@
                         </c:when>
                         <c:otherwise>
                             <script>
-                                const currentEnrollmentId=parseInt(${enrollment.enrollmentId});
+                                const currentEnrollmentId=parseInt(<c:out value="${enrollment.enrollmentId}"/>);
                                 let newEnrollmentId=1;
                                 if(!isNaN(currentEnrollmentId)){
                                     newEnrollmentId+=currentEnrollmentId;
@@ -55,8 +55,6 @@
                     </script>
                 </c:when>
                 <c:otherwise>
-
-
                     <h3><fmt:message key="applications"/>:</h3>
                     <c:choose>
                         <c:when test="${ not empty applicants}">
@@ -64,7 +62,7 @@
                                 <p><a style="color:black"
                                       href="Committee?command=view_application&&id=${applicant.id}">
                                     <fmt:message key="enrollment"/>
-                                    #${applicant.enrollmentId} ${applicant.facultyName} <font color=" <c:choose>
+                                    №<c:out value="${applicant.enrollmentId}"/> <c:out value="${applicant.facultyName}"/> <font color=" <c:choose>
                                 <c:when test="${applicant.applicantState=='NOT_ENROLLED'}">firebrick</c:when>
                                     <c:otherwise>darkcyan</c:otherwise></c:choose>"><fmt:message
                                         key="${applicant.applicantState}"/></font></a>
@@ -76,16 +74,14 @@
                             </p>
                         </c:otherwise>
                     </c:choose>
-
-
                 </c:otherwise>
             </c:choose>
         </div>
         <div style="float:right;width: 35%">
             <h3><fmt:message key="personal_data"/></h3>
-            <p class="personalData"><fmt:message key="Surname"/>: <font color="#008b8b">${user.lastName}</font></p>
-            <p class="personalData"><fmt:message key="Name"/>: <font color="#008b8b">${user.firstName}</font></p>
-            <p class="personalData"><fmt:message key="Patronymic"/>: <font color="#008b8b">${user.patronymic}</font></p>
+            <p class="personalData"><fmt:message key="Surname"/>: <font color="#008b8b"><c:out value="${user.lastName}"/></font></p>
+            <p class="personalData"><fmt:message key="Name"/>: <font color="#008b8b"><c:out value="${user.firstName}"/></font></p>
+            <p class="personalData"><fmt:message key="Patronymic"/>: <font color="#008b8b"><c:out value="${user.patronymic}"/></font></p>
             <form action="Committee" method="get">
                 <input type="hidden" name="command" value="edit_profile"/>
                 <input class="submitButton" type="submit" value="<fmt:message key="edit"/>"/>

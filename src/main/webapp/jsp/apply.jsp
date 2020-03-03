@@ -12,7 +12,7 @@
 
     <div id="content">
 
-        <h1><fmt:message key="apply_for"/> <font color="#008b8b">${faculty.name}</font>:</h1>
+        <h1><fmt:message key="apply_for"/> <font color="#008b8b"><c:out value="${faculty.name}"/></font>:</h1>
 
         <form id="infoMessage" action="Committee" method="post">
             <p class="register_field"><fmt:message key="enter_subject_ratings"/>:</p>
@@ -24,12 +24,9 @@
 
             <c:forEach items="${faculty.requiredSubjects}" var="subject">
                 <input class="register_field" name="grade" placeholder="${subject.name}"/><br>
-<%--                <input type="hidden" name="subject_name" value="${subject.name}"/>--%>
             </c:forEach>
             <input type="hidden" name="id" value="${faculty.id}"/>
             <input class="submitButton" type="submit" value="<fmt:message key="apply"/>"/><br>
-
-
         </form>
     </div>
 

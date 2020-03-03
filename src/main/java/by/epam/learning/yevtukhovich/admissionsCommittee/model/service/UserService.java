@@ -1,16 +1,14 @@
 package by.epam.learning.yevtukhovich.admissionsCommittee.model.service;
 
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.exception.UserDaoException;
-import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.factory.DaoFactory;
-import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.factory.DaoType;
-import by.epam.learning.yevtukhovich.admissionsCommittee.model.dao.implementation.UserDaoImpl;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.entity.User;
 import by.epam.learning.yevtukhovich.admissionsCommittee.model.service.exception.UserServiceException;
 
 import java.sql.Connection;
-import java.util.Optional;
 
 public class UserService extends Service {
+
+
 
     public User login(String login) throws UserServiceException {
         try {
@@ -23,19 +21,12 @@ public class UserService extends Service {
 
     }
 
-    public Optional<Integer> addUser(User user) throws UserServiceException {
-        Connection connection = pool.getConnection();
+    public int addUser(Connection connection, User user) throws UserServiceException {
         try {
-            if (checkLoginUniqueness(connection, user.getLogin())) {
-                return Optional.of(userDao.insert(connection, user));
-            } else {
-                return Optional.empty();
-            }
+            return userDao.insert(connection, user);
         } catch (UserDaoException e) {
             logger.error(e.getMessage());
             throw new UserServiceException(e.getMessage());
-        } finally {
-            pool.releaseConnection(connection);
         }
     }
 
@@ -48,7 +39,7 @@ public class UserService extends Service {
         }
     }
 
-    private boolean checkLoginUniqueness(Connection connection, String login) throws UserServiceException {
+    public boolean checkLoginUniqueness(Connection connection, String login) throws UserServiceException {
 
         try {
             User user = userDao.getByLogin(connection, login);

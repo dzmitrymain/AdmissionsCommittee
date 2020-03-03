@@ -14,7 +14,7 @@
     <div id="content">
 
 
-        <h1><fmt:message key="enrollment"/><c:if test="${not empty enrollment}"> №${enrollment.enrollmentId}</c:if>:
+        <h1><fmt:message key="enrollment"/><c:if test="${not empty enrollment}"> №<c:out value="${enrollment.enrollmentId}"/></c:if>:
             <c:choose>
             <c:when test="${enrollment.state=='OPENED'}"><font color="#008b8b"><fmt:message key="${enrollment.state}"/></font></h1>
         <p id="infoMessage"><fmt:message key="start_date"/>: <font color="#008b8b"><fmt:formatDate value="${enrollment.startDate}"

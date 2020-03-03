@@ -18,6 +18,7 @@
             </h4>
         </li>
     </ul>
+
     <c:if test="${user.role=='ADMIN'}">
         <h3 style="margin-top: 20px"><font color="#008b8b"><fmt:message key="admin_menu"/>:</font></h3>
         <ul style="text-align: left">
@@ -37,6 +38,4 @@
             </li>
         </ul>
     </c:if>
-
-
 </div>

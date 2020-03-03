@@ -40,11 +40,12 @@ public class EnrollmentStateFilter implements Filter {
             Enrollment latestEnrollment = enrollmentService.getLatestEnrollment();
             if (latestEnrollment != null) {
                 servletRequest.setAttribute(Parameters.ENROLLMENT, latestEnrollment);
+                LOGGER.info("enrollment has been gotten and set as attribute");
             } else {
                 LOGGER.warn("there was no one enrollment");
             }
             filterChain.doFilter(servletRequest, servletResponse);
-        } catch (EnrollmentServiceException e) {
+        } catch (EnrollmentServiceException | NullPointerException e) {
             LOGGER.error(e.getMessage());
             reInitConnectionPool();
             session.setAttribute(Parameters.ERROR, Messages.INTERNAL_ERROR);

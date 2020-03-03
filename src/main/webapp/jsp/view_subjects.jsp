@@ -16,7 +16,7 @@
 
         <ol style="text-align: left; margin-left: 40% ">
             <c:forEach var="subject" items="${subjects}">
-                <li>${subject.name}
+                <li><c:out value="${subject.name}"/>
                     <form action="Committee" method="post"
                           style="display: inline; padding: 0px 100px 0px 0px;alignment: right">
                         <input type="hidden" name="command" value="delete_subject"/>

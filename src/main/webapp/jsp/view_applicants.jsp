@@ -31,10 +31,10 @@
                         <tr>
                             <td>
                                 <a style="color: black"
-                                   href="Committee?command=view_application&id=${applicant.id}">${applicant.lastName} ${applicant.firstName} ${applicant.patronymic}</a>
+                                   href="Committee?command=view_application&id=${applicant.id}"><c:out value="${applicant.lastName}"/> <c:out value="${applicant.firstName}"/> <c:out value="${applicant.patronymic}"/></a>
                             </td>
-                            <td>${applicant.facultyName}</td>
-                            <td>${applicant.totalRating}</td>
+                            <td><c:out value="${applicant.facultyName}"/></td>
+                            <td><c:out value="${applicant.totalRating}"/></td>
                             <td><font
                             <c:choose>
                                     <c:when test="${applicant.applicantState=='NOT_ENROLLED'}">color="#b22222"</c:when>

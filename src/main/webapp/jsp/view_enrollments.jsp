@@ -29,7 +29,7 @@
                         <tr>
                             <td>
                                 <a style="color: black" href="Committee?command=view_applicants&id=${enrollment.enrollmentId}">
-                                    <fmt:message key="enrollment"/> №${enrollment.enrollmentId}</a>
+                                    <fmt:message key="enrollment"/> №<c:out value="${enrollment.enrollmentId}"/></a>
                             </td>
                             <td><font color="#008b8b"><fmt:formatDate value="${enrollment.startDate}"
                                                                       pattern="dd-MM-yyyy HH:mm"/></font></td>
